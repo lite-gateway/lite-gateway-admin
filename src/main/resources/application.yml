@@ -43,9 +43,9 @@ spring:
         namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
   flyway:
-    enabled:
-      locations: classpath:db/migration
-      baseline-on-migrate: true
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
 # MyBatis-Plus 配置
 mybatis-plus:
