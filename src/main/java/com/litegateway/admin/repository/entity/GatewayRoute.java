@@ -33,27 +33,24 @@ public class GatewayRoute {
     private String header;
 
     /**
-     * @deprecated 使用 rateLimitRuleId 替代
-     */
-    @Deprecated
-    private String filterRateLimiterName;
-
-    /**
-     * @deprecated 使用 rateLimitRuleId 关联的 RateLimitRule 中的 replenishRate 替代
-     */
-    @Deprecated
-    private Integer replenishRate;
-
-    /**
-     * @deprecated 使用 rateLimitRuleId 关联的 RateLimitRule 中的 burstCapacity 替代
-     */
-    @Deprecated
-    private Integer burstCapacity;
-
-    /**
      * 限流规则ID，关联 rate_limit_rule 表
      */
     private String rateLimitRuleId;
+
+    /**
+     * 关联服务ID，对应 service_info 表
+     */
+    private Long serviceId;
+
+    /**
+     * 关联熔断规则ID，对应 circuit_breaker_rule 表
+     */
+    private String circuitBreakerRuleId;
+
+    /**
+     * 关联灰度规则ID，对应 canary_rule 表
+     */
+    private String canaryRuleId;
 
     private Integer weight;
 

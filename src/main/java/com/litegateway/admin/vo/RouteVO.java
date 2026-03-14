@@ -37,6 +37,21 @@ public class RouteVO {
     @Schema(description = "限流器")
     private String filterRateLimiterName;
 
+    @Schema(description = "限流规则ID")
+    private String rateLimitRuleId;
+
+    @Schema(description = "关联服务ID")
+    private Long serviceId;
+
+    @Schema(description = "关联服务名称")
+    private String serviceName;
+
+    @Schema(description = "关联熔断规则ID")
+    private String circuitBreakerRuleId;
+
+    @Schema(description = "关联灰度规则ID")
+    private String canaryRuleId;
+
     @Schema(description = "状态，0启用，1禁用")
     private String status;
 
@@ -51,5 +66,6 @@ public class RouteVO {
     private String updateBy;
 
     @Schema(description = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC+8")
     private LocalDateTime updateTime;
 }

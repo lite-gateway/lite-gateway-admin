@@ -54,8 +54,8 @@ public class DashboardController {
 
         // 2. 限流规则数 - 统计配置了限流器的路由
         LambdaQueryWrapper<GatewayRoute> rateLimitWrapper = new LambdaQueryWrapper<>();
-        rateLimitWrapper.isNotNull(GatewayRoute::getFilterRateLimiterName);
-        rateLimitWrapper.ne(GatewayRoute::getFilterRateLimiterName, "");
+        rateLimitWrapper.isNotNull(GatewayRoute::getRateLimitRuleId);
+        rateLimitWrapper.ne(GatewayRoute::getRateLimitRuleId, "");
         rateLimitWrapper.eq(GatewayRoute::getDeleted, 0);
         Long rateLimitCount = gatewayRouteMapper.selectCount(rateLimitWrapper);
         stats.setRateLimitCount(rateLimitCount != null ? rateLimitCount.intValue() : 0);

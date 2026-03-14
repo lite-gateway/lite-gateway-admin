@@ -3,12 +3,11 @@ package com.litegateway.admin.controller;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.litegateway.admin.common.web.PageBody;
 import com.litegateway.admin.common.web.Result;
-import com.litegateway.admin.dto.InstanceDTO;
 import com.litegateway.admin.dto.InterfaceDTO;
 import com.litegateway.admin.dto.RouteDTO;
-import com.litegateway.admin.query.InstanceQuery;
 import com.litegateway.admin.query.RouteQuery;
 import com.litegateway.admin.service.GatewayRouteService;
+import com.litegateway.admin.service.ServiceInstanceService;
 import com.litegateway.admin.vo.RouteVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,12 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 网关路由管理控制器
- *
+ * 注意：实例管理已移至 ServiceController
  */
 @Slf4j
 @RestController
@@ -34,6 +32,9 @@ public class GatewayRouteController {
 
     @Autowired
     private GatewayRouteService gatewayRouteService;
+
+    @Autowired
+    private ServiceInstanceService serviceInstanceService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -159,51 +160,31 @@ public class GatewayRouteController {
     }
 
     /**
-     * 获取服务所有实例
+     * 获取服务所有实例（从Nacos）
+     * @deprecated 请使用 ServiceController 的 /gateway/service/{serviceId}/instances 接口
      */
+    @Deprecated
     @GetMapping("/instances")
-    @Operation(summary = "获取服务所有实例", description = "从 Nacos 获取服务实例列表")
+    @Operation(summary = "获取服务所有实例", description = "从 Nacos 获取服务实例列表（已废弃，请使用 /gateway/service/{serviceId}/instances）")
     public Result<PageBody<Instance>> getAllInstances(@RequestParam String serviceName) {
-        List<Instance> instances = gatewayRouteService.getAllInstances(serviceName);
+        List<Instance> instances = serviceInstanceService.getInstancesFromNacos(serviceName);
         return Result.ok(new PageBody<>(instances));
     }
 
     /**
-     * 分页获取服务实例
+     * 分页获取服务实例（从Nacos）
+     * @deprecated 请使用 ServiceController 的相关接口
      */
+    @Deprecated
     @GetMapping("/instances/page")
-    @Operation(summary = "分页获取服务实例", description = "分页查询 Nacos 服务实例")
-    public Result<PageBody<Instance>> getAllInstancesPage(@ModelAttribute InstanceQuery query) {
-        List<Instance> records = new ArrayList<>();
-        try {
-            records = gatewayRouteService.getAllInstancesPage(query);
-        } catch (Exception e) {
-            log.error("Failed to get instances page: {}", e.getMessage());
-        }
-
+    @Operation(summary = "分页获取服务实例", description = "分页查询 Nacos 服务实例（已废弃）")
+    public Result<PageBody<Instance>> getAllInstancesPage(
+            @RequestParam String serviceName,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        List<Instance> records = serviceInstanceService.getInstancesFromNacosPage(serviceName, pageNum, pageSize);
         int total = records.size();
-        int pages = query.getPageSize() > 0 ? (total + query.getPageSize() - 1) / query.getPageSize() : 1;
-
-        return Result.ok(new PageBody<>((long) total, pages, query.getPageSize(), query.getPageNum(), records));
-    }
-
-    /**
-     * 更新实例权重
-     */
-    @PostMapping("/instances/weight")
-    @Operation(summary = "更新实例权重", description = "修改 Nacos 服务实例权重")
-    public Result<Void> updateInstanceWeight(@RequestBody InstanceDTO dto) {
-        gatewayRouteService.updateInstanceWeight(dto);
-        return Result.ok();
-    }
-
-    /**
-     * 更新实例启用状态
-     */
-    @PostMapping("/instances/enabled")
-    @Operation(summary = "实例上下线", description = "启用或禁用 Nacos 服务实例")
-    public Result<Void> updateInstanceEnabled(@RequestBody InstanceDTO dto) {
-        gatewayRouteService.updateInstanceEnabled(dto);
-        return Result.ok();
+        int pages = pageSize > 0 ? (total + pageSize - 1) / pageSize : 1;
+        return Result.ok(new PageBody<>((long) total, pages, pageSize, pageNum, records));
     }
 }

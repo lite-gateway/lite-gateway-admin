@@ -1,5 +1,6 @@
 package com.litegateway.admin.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -62,12 +63,14 @@ public class RouteDTO {
     private String createBy;
 
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC+8")
     private LocalDateTime createTime;
 
     @Schema(description = "更新人")
     private String updateBy;
 
     @Schema(description = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC+8")
     private LocalDateTime updateTime;
 
     @Schema(description = "权重名称", hidden = true)
@@ -75,4 +78,13 @@ public class RouteDTO {
 
     @Schema(description = "权重", hidden = true)
     private Integer weight;
+
+    @Schema(description = "关联服务ID")
+    private Long serviceId;
+
+    @Schema(description = "关联熔断规则ID")
+    private String circuitBreakerRuleId;
+
+    @Schema(description = "关联灰度规则ID")
+    private String canaryRuleId;
 }

@@ -8,10 +8,14 @@ import java.time.LocalDateTime;
 /**
  * 限流规则与路由关联实体类
  * 对应数据库表 rate_limit_route_relation
- * 用于实现限流规则与路由的多对多关系
+ *
+ * 注意：此表已废弃，因为 GatewayRoute 现在直接通过 rate_limit_rule_id 字段关联限流规则
+ * 保留此实体仅用于兼容旧数据，新功能请使用 GatewayRoute.rateLimitRuleId
+ * @deprecated 使用 GatewayRoute.rateLimitRuleId 替代
  */
 @Data
 @TableName("rate_limit_route_relation")
+@Deprecated
 public class RateLimitRouteRelation {
 
     @TableId(type = IdType.AUTO)

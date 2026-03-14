@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS `circuit_breaker_rule` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `rule_id` varchar(64) NOT NULL COMMENT '规则ID',
+  `rule_name` varchar(128) NOT NULL COMMENT '规则名称',
+  `route_id` varchar(64) DEFAULT NULL COMMENT '关联路由ID',
+  `failure_rate_threshold` float DEFAULT '50' COMMENT '失败率阈值',
+  `wait_duration_in_open_state` int(11) DEFAULT '60' COMMENT '熔断持续时间(秒)',
+  `permitted_number_of_calls_in_half_open_state` int(11) DEFAULT '10' COMMENT '半开允许调用数',
+  `sliding_window_size` int(11) DEFAULT '100' COMMENT '滑动窗口大小',
+  `minimum_number_of_calls` int(11) DEFAULT '10' COMMENT '最小调用次数',
+  `slow_call_rate_threshold` float DEFAULT '50' COMMENT '慢调用率阈值',
+  `slow_call_duration_threshold` int(11) DEFAULT '5' COMMENT '慢调用持续时间(秒)',
+  `timeout_duration` int(11) DEFAULT '5' COMMENT '超时时间(秒)',
+  `enabled` tinyint(1) DEFAULT '1' COMMENT '是否启用',
+  `create_by` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_by` varchar(64) DEFAULT NULL,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_rule_id` (`rule_id`),
+  KEY `idx_route_id` (`route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='熔断规则表';

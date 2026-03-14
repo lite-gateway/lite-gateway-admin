@@ -24,4 +24,16 @@ public class GatewayConfigDTO {
 
     @Schema(description = "白名单列表")
     private List<WhiteListDTO> whiteList;
+
+    @Schema(description = "功能配置列表")
+    private List<FeatureConfigDTO> featureConfigs;
+
+    @Schema(description = "熔断规则列表")
+    private List<CircuitBreakerRuleDTO> circuitBreakerRules;
+
+    @Schema(description = "灰度规则列表")
+    private List<CanaryRuleDTO> canaryRules;
+
+    @Schema(description = "服务列表")
+    private List<ServiceInfoDTO> services;
 }

@@ -1,0 +1,28 @@
+-- API信息表
+CREATE TABLE IF NOT EXISTS `api_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `path` varchar(512) NOT NULL COMMENT 'API路径',
+  `method` varchar(16) NOT NULL COMMENT 'HTTP方法：GET/POST/PUT/DELETE/PATCH',
+  `service_id` bigint(20) DEFAULT NULL COMMENT '所属服务ID',
+  `service_name` varchar(128) DEFAULT NULL COMMENT '所属服务名',
+  `version` varchar(16) DEFAULT 'v1' COMMENT 'API版本',
+  `title` varchar(256) DEFAULT NULL COMMENT 'API名称/标题',
+  `description` varchar(1024) DEFAULT NULL COMMENT 'API描述',
+  `status` tinyint(1) DEFAULT '0' COMMENT '状态：0-草稿 1-已发布 2-已下线',
+  `require_auth` tinyint(1) DEFAULT '1' COMMENT '是否需要认证',
+  `request_params` text COMMENT '请求参数描述（JSON）',
+  `response_params` text COMMENT '响应参数描述（JSON）',
+  `route_id` bigint(20) DEFAULT NULL COMMENT '关联的路由ID',
+  `swagger_source` varchar(512) DEFAULT NULL COMMENT 'Swagger来源',
+  `tags` varchar(256) DEFAULT NULL COMMENT '标签/分组',
+  `create_by` varchar(64) DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_by` varchar(64) DEFAULT NULL,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_service_id` (`service_id`),
+  KEY `idx_service_name` (`service_name`),
+  KEY `idx_path_method` (`path`(255), `method`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='API信息表';
