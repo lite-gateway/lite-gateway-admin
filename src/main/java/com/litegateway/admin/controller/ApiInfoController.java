@@ -16,17 +16,19 @@ import java.util.List;
 
 /**
  * API管理控制器
+ * 仅在 Nacos 启用时加载
  */
 @Slf4j
 @RestController
 @RequestMapping("/gateway/api")
 @RequiredArgsConstructor
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(com.alibaba.nacos.api.naming.NamingService.class)
 public class ApiInfoController {
 
     @Autowired
     private ApiInfoService apiInfoService;
 
-    @Autowired
+    @Autowired(required = false)
     private ServiceInfoService serviceInfoService;
 
     /**

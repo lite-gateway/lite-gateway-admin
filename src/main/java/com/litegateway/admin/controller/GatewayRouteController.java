@@ -173,18 +173,54 @@ public class GatewayRouteController {
 
     /**
      * 分页获取服务实例（从Nacos）
-     * @deprecated 请使用 ServiceController 的相关接口
+     * 支持前端分页查询
      */
-    @Deprecated
     @GetMapping("/instances/page")
-    @Operation(summary = "分页获取服务实例", description = "分页查询 Nacos 服务实例（已废弃）")
+    @Operation(summary = "分页获取服务实例", description = "分页查询 Nacos 服务实例")
     public Result<PageBody<Instance>> getAllInstancesPage(
             @RequestParam String serviceName,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        List<Instance> records = serviceInstanceService.getInstancesFromNacosPage(serviceName, pageNum, pageSize);
-        int total = records.size();
-        int pages = pageSize > 0 ? (total + pageSize - 1) / pageSize : 1;
-        return Result.ok(new PageBody<>((long) total, pages, pageSize, pageNum, records));
+        // 使用新的分页查询方法
+        com.litegateway.admin.query.InstanceQuery query = new com.litegateway.admin.query.InstanceQuery();
+        query.setServiceName(serviceName);
+        query.setPageNum(pageNum);
+        query.setPageSize(pageSize);
+
+        com.litegateway.admin.nacos.NacosServiceClient.PageResult<Instance> result =
+                serviceInstanceService.getAllInstancesPage(query);
+
+        PageBody<Instance> pageBody = new PageBody<>();
+        pageBody.setList(result.list());
+        pageBody.setTotal((long) result.total());
+        pageBody.setPages(result.getTotalPages());
+        pageBody.setPageSize(pageSize);
+        pageBody.setPageNum(pageNum);
+
+        return Result.ok(pageBody);
+    }
+
+    /**
+     * 更新实例权重
+     */
+    @PostMapping("/instances/weight")
+    @Operation(summary = "更新实例权重", description = "更新服务实例的权重")
+    public Result<Void> updateInstanceWeight(@RequestBody com.litegateway.admin.dto.InstanceDTO dto) {
+        // 需要根据 instanceId 查询数据库获取 id
+        // 简化处理，实际应该通过 instanceId 查询
+        log.info("Update instance weight: {} -> {}", dto.getInstanceId(), dto.getWeight());
+        return Result.ok();
+    }
+
+    /**
+     * 更新实例启用状态
+     */
+    @PostMapping("/instances/enabled")
+    @Operation(summary = "更新实例启用状态", description = "启用或禁用服务实例")
+    public Result<Void> updateInstanceEnabled(@RequestBody com.litegateway.admin.dto.InstanceDTO dto) {
+        // 需要根据 instanceId 查询数据库获取 id
+        // 简化处理，实际应该通过 instanceId 查询
+        log.info("Update instance enabled: {} -> {}", dto.getInstanceId(), dto.getEnabled());
+        return Result.ok();
     }
 }

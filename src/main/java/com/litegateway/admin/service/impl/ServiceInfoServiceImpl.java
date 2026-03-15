@@ -1,5 +1,7 @@
 package com.litegateway.admin.service.impl;
 
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.ListView;
@@ -11,26 +13,36 @@ import com.litegateway.admin.repository.entity.ServiceInstance;
 import com.litegateway.admin.repository.mapper.ServiceInfoMapper;
 import com.litegateway.admin.repository.mapper.ServiceInstanceMapper;
 import com.litegateway.admin.service.ServiceInfoService;
-import com.litegateway.admin.service.ServiceInstanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * 服务信息服务实现类
  */
 @Slf4j
 @Service
+@ConditionalOnBean(NamingService.class)
 public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, ServiceInfo>
         implements ServiceInfoService {
 
     @Autowired
     private NamingService namingService;
+
+    @Value("${spring.cloud.nacos.discovery.server-addr:localhost:8848}")
+    private String serverAddr;
+
+    @Value("${spring.cloud.nacos.discovery.group:DEFAULT_GROUP}")
+    private String group;
 
     @Autowired
     private ServiceInstanceMapper instanceMapper;

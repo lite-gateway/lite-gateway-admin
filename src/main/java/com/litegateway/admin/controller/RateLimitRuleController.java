@@ -104,6 +104,15 @@ public class RateLimitRuleController {
     }
 
     /**
+     * 根据路由ID查询关联的限流规则
+     */
+    @GetMapping("/route")
+    public Result<List<RateLimitRule>> getRateLimitsByRouteId(@RequestParam String routeId) {
+        List<RateLimitRule> rules = rateLimitRuleService.listByRouteId(routeId);
+        return Result.ok(rules);
+    }
+
+    /**
      * 获取限流规则已绑定的路由ID列表
      */
     @GetMapping("/bound-routes")

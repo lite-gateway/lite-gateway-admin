@@ -83,9 +83,19 @@ public class CircuitBreakerRuleController {
 
     /**
      * 根据路由ID查询熔断规则
+     * 支持 /route/{routeId} 和 /route?routeId=xxx 两种形式
      */
     @GetMapping("/route/{routeId}")
-    public Result<List<CircuitBreakerRule>> getByRouteId(@PathVariable String routeId) {
+    public Result<List<CircuitBreakerRule>> getByRouteIdPath(@PathVariable String routeId) {
+        List<CircuitBreakerRule> rules = circuitBreakerRuleService.listByRouteId(routeId);
+        return Result.ok(rules);
+    }
+
+    /**
+     * 根据路由ID查询熔断规则（Query参数形式）
+     */
+    @GetMapping("/route")
+    public Result<List<CircuitBreakerRule>> getByRouteIdQuery(@RequestParam String routeId) {
         List<CircuitBreakerRule> rules = circuitBreakerRuleService.listByRouteId(routeId);
         return Result.ok(rules);
     }

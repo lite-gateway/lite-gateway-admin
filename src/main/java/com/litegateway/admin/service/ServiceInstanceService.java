@@ -2,6 +2,8 @@ package com.litegateway.admin.service;
 
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.litegateway.admin.nacos.NacosServiceClient;
+import com.litegateway.admin.query.InstanceQuery;
 import com.litegateway.admin.repository.entity.ServiceInstance;
 
 import java.util.List;
@@ -11,6 +13,15 @@ import java.util.List;
  * 统一管理服务实例，包括本地数据库和Nacos同步
  */
 public interface ServiceInstanceService extends IService<ServiceInstance> {
+
+    /**
+     * 实例统计接口
+     */
+    interface ServiceInstanceStats {
+        int getTotalCount();
+        int getHealthyCount();
+        int getEnabledCount();
+    }
 
     // ==================== 本地数据库操作 ====================
 
@@ -64,6 +75,13 @@ public interface ServiceInstanceService extends IService<ServiceInstance> {
      */
     List<Instance> getInstancesFromNacosPage(String serviceName, int pageNum, int pageSize);
 
+    /**
+     * 分页查询实例（使用 InstanceQuery 参数）
+     * @param query 查询参数
+     * @return 分页结果
+     */
+    NacosServiceClient.PageResult<Instance> getAllInstancesPage(InstanceQuery query);
+
     // ==================== 实例管理（同时更新Nacos和数据库） ====================
 
     /**
@@ -75,23 +93,4 @@ public interface ServiceInstanceService extends IService<ServiceInstance> {
      * 更新实例启用状态（同时更新Nacos和数据库）
      */
     void updateEnabled(Long id, Boolean enabled);
-
-    /**
-     * 实例统计类
-     */
-    class ServiceInstanceStats {
-        private int totalCount;
-        private int healthyCount;
-        private int enabledCount;
-
-        public ServiceInstanceStats(int totalCount, int healthyCount, int enabledCount) {
-            this.totalCount = totalCount;
-            this.healthyCount = healthyCount;
-            this.enabledCount = enabledCount;
-        }
-
-        public int getTotalCount() { return totalCount; }
-        public int getHealthyCount() { return healthyCount; }
-        public int getEnabledCount() { return enabledCount; }
-    }
 }
