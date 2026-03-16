@@ -9,23 +9,31 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@TableName(value = "protocol_conversion", autoResultMap = true)
-public class ProtocolConversion {
+@TableName(value = "plugin", autoResultMap = true)
+public class Plugin {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String conversionId;
+    private String pluginId;
 
-    private String name;
+    private String pluginName;
 
     private String description;
 
-    private String sourceProtocol;
+    private String pluginType;
 
-    private String targetProtocol;
+    private String executePhase;
+
+    private String luaScript;
+
+    private String scriptPath;
+
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private Map<String, Object> defaultConfig;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> routeIds;
@@ -33,25 +41,13 @@ public class ProtocolConversion {
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> serviceIds;
 
-    private String grpcServiceName;
+    private Integer priority;
 
-    private String grpcMethodName;
+    private Long timeout;
 
-    private String dubboInterface;
+    private Integer memoryLimit;
 
-    private String dubboMethod;
-
-    private String dubboVersion;
-
-    private String dubboGroup;
-
-    private String wsEndpoint;
-
-    private String wsMessageType;
-
-    private Integer heartbeatInterval;
-
-    private String transformScript;
+    private String version;
 
     private Integer enabled;
 

@@ -1,10 +1,10 @@
 package com.litegateway.admin.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.litegateway.admin.entity.AiRouteRuleEntity;
 import com.litegateway.admin.mapper.AiRouteRuleMapper;
-import com.litegateway.core.common.web.Result;
+import com.litegateway.admin.common.web.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,20 +36,18 @@ public class AiRouteRuleController {
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
             @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
             @Parameter(description = "状态") @RequestParam(required = false) Integer status) {
-        
-        LambdaQueryWrapper<AiRouteRuleEntity> wrapper = new LambdaQueryWrapper<>()
-                .orderByAsc(AiRouteRuleEntity::getPriority);
-        
+
+        QueryWrapper<AiRouteRuleEntity> wrapper = new QueryWrapper<>();
+        wrapper.orderByAsc("priority");
+
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(AiRouteRuleEntity::getRuleName, keyword)
-                    .or()
-                    .like(AiRouteRuleEntity::getRuleCode, keyword));
+            wrapper.and(w -> w.like("rule_name", keyword).or().like("rule_code", keyword));
         }
-        
+
         if (status != null) {
-            wrapper.eq(AiRouteRuleEntity::getStatus, status);
+            wrapper.eq("status", status);
         }
-        
+
         Page<AiRouteRuleEntity> result = routeRuleMapper.selectPage(new Page<>(page, size), wrapper);
         return Result.success(result);
     }
@@ -60,10 +58,10 @@ public class AiRouteRuleController {
     @Operation(summary = "获取所有启用的路由规则")
     @GetMapping("/enabled")
     public Result<List<AiRouteRuleEntity>> listEnabled() {
-        LambdaQueryWrapper<AiRouteRuleEntity> wrapper = new LambdaQueryWrapper<>()
-                .eq(AiRouteRuleEntity::getStatus, 1)
-                .orderByAsc(AiRouteRuleEntity::getPriority);
-        
+        QueryWrapper<AiRouteRuleEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", 1);
+        wrapper.orderByAsc("priority");
+
         List<AiRouteRuleEntity> list = routeRuleMapper.selectList(wrapper);
         return Result.success(list);
     }
@@ -88,15 +86,15 @@ public class AiRouteRuleController {
     @PostMapping
     public Result<Long> create(@RequestBody @Validated AiRouteRuleEntity entity) {
         // 检查编码是否已存在
-        LambdaQueryWrapper<AiRouteRuleEntity> wrapper = new LambdaQueryWrapper<>()
-                .eq(AiRouteRuleEntity::getRuleCode, entity.getRuleCode());
+        QueryWrapper<AiRouteRuleEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("rule_code", entity.getRuleCode());
         if (routeRuleMapper.selectCount(wrapper) > 0) {
             return Result.error("路由规则编码已存在");
         }
-        
+
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         routeRuleMapper.insert(entity);
         return Result.success(entity.getId());
     }
@@ -111,19 +109,19 @@ public class AiRouteRuleController {
         if (existing == null) {
             return Result.error("路由规则不存在");
         }
-        
+
         // 检查编码是否冲突
         if (!existing.getRuleCode().equals(entity.getRuleCode())) {
-            LambdaQueryWrapper<AiRouteRuleEntity> wrapper = new LambdaQueryWrapper<>()
-                    .eq(AiRouteRuleEntity::getRuleCode, entity.getRuleCode());
+            QueryWrapper<AiRouteRuleEntity> wrapper = new QueryWrapper<>();
+            wrapper.eq("rule_code", entity.getRuleCode());
             if (routeRuleMapper.selectCount(wrapper) > 0) {
                 return Result.error("路由规则编码已存在");
             }
         }
-        
+
         entity.setId(id);
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         routeRuleMapper.updateById(entity);
         return Result.success();
     }
@@ -148,7 +146,7 @@ public class AiRouteRuleController {
         entity.setId(id);
         entity.setStatus(status);
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         routeRuleMapper.updateById(entity);
         return Result.success();
     }
@@ -163,7 +161,7 @@ public class AiRouteRuleController {
         entity.setId(id);
         entity.setPriority(priority);
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         routeRuleMapper.updateById(entity);
         return Result.success();
     }

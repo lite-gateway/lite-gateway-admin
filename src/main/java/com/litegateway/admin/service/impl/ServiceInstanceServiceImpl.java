@@ -15,21 +15,19 @@ import com.litegateway.admin.service.ServiceInstanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 服务实例服务实现类
  * 统一管理服务实例，包括本地数据库和Nacos同步
- * 仅在 Nacos 启用时加载
  */
 @Slf4j
 @Service
-@ConditionalOnBean(NacosServiceClient.class)
 public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMapper, ServiceInstance>
         implements ServiceInstanceService {
 
@@ -42,10 +40,10 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
     @Autowired
     private ServiceInstanceMapper instanceMapper;
 
-    @Autowired
+    @Autowired(required = false)
     private NacosServiceClient nacosServiceClient;
 
-    @Autowired
+    @Autowired(required = false)
     private InstanceCacheManager cacheManager;
 
     // ==================== 本地数据库操作 ====================
@@ -99,6 +97,10 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
 
     @Override
     public void syncInstancesFromNacos(Long serviceId, String serviceName) {
+        if (nacosServiceClient == null) {
+            log.warn("NacosServiceClient is not available, skip sync instances from Nacos");
+            return;
+        }
         try {
             // 使用 NacosServiceClient 获取实例（带缓存）
             List<Instance> nacosInstances = nacosServiceClient.getAllInstances(serviceName);
@@ -121,6 +123,10 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
 
     @Override
     public void syncAllInstancesFromNacos() {
+        if (nacosServiceClient == null) {
+            log.warn("NacosServiceClient is not available, skip sync all instances from Nacos");
+            return;
+        }
         log.info("Starting full instance sync from Nacos...");
         // 获取所有服务并逐个同步
         List<String> services = nacosServiceClient.getAllServices();
@@ -138,12 +144,20 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
 
     @Override
     public List<Instance> getInstancesFromNacos(String serviceName) {
+        if (nacosServiceClient == null) {
+            log.warn("NacosServiceClient is not available, return empty list");
+            return Collections.emptyList();
+        }
         // 使用 NacosServiceClient（带缓存）
         return nacosServiceClient.getAllInstances(serviceName);
     }
 
     @Override
     public List<Instance> getInstancesFromNacosPage(String serviceName, int pageNum, int pageSize) {
+        if (nacosServiceClient == null) {
+            log.warn("NacosServiceClient is not available, return empty list");
+            return Collections.emptyList();
+        }
         InstanceQuery query = new InstanceQuery();
         query.setServiceName(serviceName);
         query.setPageNum(pageNum);
@@ -155,6 +169,10 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
 
     @Override
     public PageResult<Instance> getAllInstancesPage(InstanceQuery query) {
+        if (nacosServiceClient == null) {
+            log.warn("NacosServiceClient is not available, return empty result");
+            return new PageResult<>(Collections.emptyList(), 0, query.getPageNum(), query.getPageSize());
+        }
         return nacosServiceClient.getInstancesPage(query);
     }
 
@@ -174,21 +192,23 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
         instanceMapper.updateById(instance);
 
         // 同步更新Nacos
-        try {
-            NamingMaintainService maintainService = NamingMaintainFactory.createMaintainService(serverAddr);
-            Instance nacosInstance = new Instance();
-            nacosInstance.setServiceName(instance.getServiceName());
-            nacosInstance.setInstanceId(instance.getInstanceId());
-            nacosInstance.setWeight(weight);
-            maintainService.updateInstance(instance.getServiceName(), group, nacosInstance);
-            
-            // 更新缓存
-            cacheManager.invalidate(instance.getServiceName());
-            
-            log.info("Updated instance weight in Nacos: {} -> {}", id, weight);
-        } catch (NacosException e) {
-            log.error("Failed to update instance weight in Nacos", e);
-            throw new RuntimeException("更新Nacos实例权重失败: " + e.getMessage(), e);
+        if (cacheManager != null) {
+            try {
+                NamingMaintainService maintainService = NamingMaintainFactory.createMaintainService(serverAddr);
+                Instance nacosInstance = new Instance();
+                nacosInstance.setServiceName(instance.getServiceName());
+                nacosInstance.setInstanceId(instance.getInstanceId());
+                nacosInstance.setWeight(weight);
+                maintainService.updateInstance(instance.getServiceName(), group, nacosInstance);
+                
+                // 更新缓存
+                cacheManager.invalidate(instance.getServiceName());
+                
+                log.info("Updated instance weight in Nacos: {} -> {}", id, weight);
+            } catch (NacosException e) {
+                log.error("Failed to update instance weight in Nacos", e);
+                throw new RuntimeException("更新Nacos实例权重失败: " + e.getMessage(), e);
+            }
         }
 
         log.info("Updated instance weight: {} -> {}", id, weight);
@@ -208,21 +228,23 @@ public class ServiceInstanceServiceImpl extends ServiceImpl<ServiceInstanceMappe
         instanceMapper.updateById(instance);
 
         // 同步更新Nacos
-        try {
-            NamingMaintainService maintainService = NamingMaintainFactory.createMaintainService(serverAddr);
-            Instance nacosInstance = new Instance();
-            nacosInstance.setServiceName(instance.getServiceName());
-            nacosInstance.setInstanceId(instance.getInstanceId());
-            nacosInstance.setEnabled(enabled);
-            maintainService.updateInstance(instance.getServiceName(), group, nacosInstance);
-            
-            // 更新缓存
-            cacheManager.invalidate(instance.getServiceName());
-            
-            log.info("Updated instance enabled status in Nacos: {} -> {}", id, enabled);
-        } catch (NacosException e) {
-            log.error("Failed to update instance enabled status in Nacos", e);
-            throw new RuntimeException("更新Nacos实例状态失败: " + e.getMessage(), e);
+        if (cacheManager != null) {
+            try {
+                NamingMaintainService maintainService = NamingMaintainFactory.createMaintainService(serverAddr);
+                Instance nacosInstance = new Instance();
+                nacosInstance.setServiceName(instance.getServiceName());
+                nacosInstance.setInstanceId(instance.getInstanceId());
+                nacosInstance.setEnabled(enabled);
+                maintainService.updateInstance(instance.getServiceName(), group, nacosInstance);
+                
+                // 更新缓存
+                cacheManager.invalidate(instance.getServiceName());
+                
+                log.info("Updated instance enabled status in Nacos: {} -> {}", id, enabled);
+            } catch (NacosException e) {
+                log.error("Failed to update instance enabled status in Nacos", e);
+                throw new RuntimeException("更新Nacos实例状态失败: " + e.getMessage(), e);
+            }
         }
 
         log.info("Updated instance enabled status: {} -> {}", id, enabled);

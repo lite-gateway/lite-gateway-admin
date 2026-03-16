@@ -1,10 +1,10 @@
 package com.litegateway.admin.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.litegateway.admin.entity.AiProviderEntity;
 import com.litegateway.admin.mapper.AiProviderMapper;
-import com.litegateway.core.common.web.Result;
+import com.litegateway.admin.common.web.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,20 +36,18 @@ public class AiProviderController {
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "10") Integer size,
             @Parameter(description = "关键词") @RequestParam(required = false) String keyword,
             @Parameter(description = "状态") @RequestParam(required = false) Integer status) {
-        
-        LambdaQueryWrapper<AiProviderEntity> wrapper = new LambdaQueryWrapper<>()
-                .orderByDesc(AiProviderEntity::getCreatedAt);
-        
+
+        QueryWrapper<AiProviderEntity> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("created_at");
+
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(AiProviderEntity::getProviderName, keyword)
-                    .or()
-                    .like(AiProviderEntity::getProviderCode, keyword));
+            wrapper.and(w -> w.like("provider_name", keyword).or().like("provider_code", keyword));
         }
-        
+
         if (status != null) {
-            wrapper.eq(AiProviderEntity::getStatus, status);
+            wrapper.eq("status", status);
         }
-        
+
         Page<AiProviderEntity> result = providerMapper.selectPage(new Page<>(page, size), wrapper);
         return Result.success(result);
     }
@@ -60,10 +58,10 @@ public class AiProviderController {
     @Operation(summary = "获取所有启用的提供商")
     @GetMapping("/enabled")
     public Result<List<AiProviderEntity>> listEnabled() {
-        LambdaQueryWrapper<AiProviderEntity> wrapper = new LambdaQueryWrapper<>()
-                .eq(AiProviderEntity::getStatus, 1)
-                .orderByAsc(AiProviderEntity::getPriority);
-        
+        QueryWrapper<AiProviderEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", 1);
+        wrapper.orderByAsc("priority");
+
         List<AiProviderEntity> list = providerMapper.selectList(wrapper);
         return Result.success(list);
     }
@@ -90,16 +88,16 @@ public class AiProviderController {
     @PostMapping
     public Result<Long> create(@RequestBody @Validated AiProviderEntity entity) {
         // 检查编码是否已存在
-        LambdaQueryWrapper<AiProviderEntity> wrapper = new LambdaQueryWrapper<>()
-                .eq(AiProviderEntity::getProviderCode, entity.getProviderCode());
+        QueryWrapper<AiProviderEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("provider_code", entity.getProviderCode());
         if (providerMapper.selectCount(wrapper) > 0) {
             return Result.error("提供商编码已存在");
         }
-        
+
         entity.setCreatedAt(LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
         entity.setHealthStatus("unknown");
-        
+
         providerMapper.insert(entity);
         return Result.success(entity.getId());
     }
@@ -114,15 +112,15 @@ public class AiProviderController {
         if (existing == null) {
             return Result.error("提供商不存在");
         }
-        
+
         entity.setId(id);
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         // 如果不传API Key，保持原值
         if (entity.getApiKeyEncrypted() == null || entity.getApiKeyEncrypted().isEmpty()) {
             entity.setApiKeyEncrypted(existing.getApiKeyEncrypted());
         }
-        
+
         providerMapper.updateById(entity);
         return Result.success();
     }
@@ -147,7 +145,7 @@ public class AiProviderController {
         entity.setId(id);
         entity.setStatus(status);
         entity.setUpdatedAt(LocalDateTime.now());
-        
+
         providerMapper.updateById(entity);
         return Result.success();
     }
@@ -162,7 +160,7 @@ public class AiProviderController {
         if (entity == null) {
             return Result.error("提供商不存在");
         }
-        
+
         // TODO: 实现连接测试逻辑
         return Result.success("连接成功");
     }

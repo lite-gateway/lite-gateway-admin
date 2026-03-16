@@ -1,7 +1,7 @@
 package com.litegateway.admin.controller;
 
 import com.litegateway.admin.mapper.AiCallLogMapper;
-import com.litegateway.core.common.web.Result;
+import com.litegateway.admin.common.web.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

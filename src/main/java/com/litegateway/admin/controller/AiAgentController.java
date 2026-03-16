@@ -2,9 +2,10 @@ package com.litegateway.admin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.litegateway.admin.common.ErrorCodeEnum;
+import com.litegateway.admin.common.web.Result;
 import com.litegateway.admin.entity.AiAgentEntity;
 import com.litegateway.admin.mapper.AiAgentMapper;
-import com.litegateway.core.common.web.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +40,7 @@ public class AiAgentController {
             @Parameter(description = "类型") @RequestParam(required = false) String agentType,
             @Parameter(description = "状态") @RequestParam(required = false) Integer status) {
         
-        LambdaQueryWrapper<AiAgentEntity> wrapper = new LambdaQueryWrapper<>()
+        LambdaQueryWrapper<AiAgentEntity> wrapper = new LambdaQueryWrapper<AiAgentEntity>()
                 .orderByDesc(AiAgentEntity::getCreatedAt);
         
         if (keyword != null && !keyword.isEmpty()) {
@@ -57,7 +58,7 @@ public class AiAgentController {
         }
         
         Page<AiAgentEntity> result = agentMapper.selectPage(new Page<>(page, size), wrapper);
-        return Result.success(result);
+        return Result.ok(result);
     }
 
     /**
@@ -68,11 +69,11 @@ public class AiAgentController {
     public Result<AiAgentEntity> getById(@PathVariable Long id) {
         AiAgentEntity entity = agentMapper.selectById(id);
         if (entity == null) {
-            return Result.error("Agent不存在");
+            return Result.failure(ErrorCodeEnum.SYSTEM_ERROR_B0001.getCode(), "Agent不存在");
         }
         // 不返回API Key
         entity.setApiKeyHash(null);
-        return Result.success(entity);
+        return Result.ok(entity);
     }
 
     /**
@@ -95,7 +96,7 @@ public class AiAgentController {
         agentMapper.insert(entity);
         
         // 返回Agent ID和API Key(仅创建时返回一次)
-        return Result.success(agentId + ":" + apiKey);
+        return Result.ok(agentId + ":" + apiKey);
     }
 
     /**
@@ -106,7 +107,7 @@ public class AiAgentController {
     public Result<Void> update(@PathVariable Long id, @RequestBody @Validated AiAgentEntity entity) {
         AiAgentEntity existing = agentMapper.selectById(id);
         if (existing == null) {
-            return Result.error("Agent不存在");
+            return Result.failure(ErrorCodeEnum.SYSTEM_ERROR_B0001.getCode(), "Agent不存在");
         }
         
         entity.setId(id);
@@ -116,7 +117,7 @@ public class AiAgentController {
         entity.setAgentId(null);
         
         agentMapper.updateById(entity);
-        return Result.success();
+        return Result.ok();
     }
 
     /**
@@ -126,7 +127,7 @@ public class AiAgentController {
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         agentMapper.deleteById(id);
-        return Result.success();
+        return Result.ok();
     }
 
     /**
@@ -141,7 +142,7 @@ public class AiAgentController {
         entity.setUpdatedAt(LocalDateTime.now());
         
         agentMapper.updateById(entity);
-        return Result.success();
+        return Result.ok();
     }
 
     /**
@@ -152,7 +153,7 @@ public class AiAgentController {
     public Result<String> resetApiKey(@PathVariable Long id) {
         AiAgentEntity existing = agentMapper.selectById(id);
         if (existing == null) {
-            return Result.error("Agent不存在");
+            return Result.failure(ErrorCodeEnum.SYSTEM_ERROR_B0001.getCode(), "Agent不存在");
         }
         
         String newApiKey = "sk-" + UUID.randomUUID().toString().replace("-", "");
@@ -164,7 +165,7 @@ public class AiAgentController {
         
         agentMapper.updateById(entity);
         
-        return Result.success(newApiKey);
+        return Result.ok(newApiKey);
     }
 
     /**
@@ -174,7 +175,7 @@ public class AiAgentController {
     @GetMapping("/{id}/stats")
     public Result<Object> getStats(@PathVariable Long id) {
         // TODO: 实现统计查询
-        return Result.success(null);
+        return Result.ok(null);
     }
 
     /**

@@ -17,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +29,10 @@ import java.util.Properties;
  */
 @Slf4j
 @Service
-@ConditionalOnBean(NamingService.class)
 public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, ServiceInfo>
         implements ServiceInfoService {
 
-    @Autowired
+    @Autowired(required = false)
     private NamingService namingService;
 
     @Value("${spring.cloud.nacos.discovery.server-addr:localhost:8848}")
@@ -83,6 +80,10 @@ public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, Servi
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void syncFromNacos() {
+        if (namingService == null) {
+            log.warn("NamingService is not available, skip sync from Nacos");
+            return;
+        }
         log.info("Starting to sync services from Nacos...");
         try {
             // 获取Nacos中的所有服务
@@ -147,6 +148,10 @@ public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, Servi
     }
 
     private void syncServiceInstances(ServiceInfo serviceInfo) {
+        if (namingService == null) {
+            log.warn("NamingService is not available, skip sync service instances");
+            return;
+        }
         try {
             // 获取Nacos中的实例列表
             List<Instance> instances = namingService.selectInstances(serviceInfo.getServiceName(), true);

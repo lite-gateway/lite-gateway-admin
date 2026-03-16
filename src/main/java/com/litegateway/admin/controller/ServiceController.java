@@ -16,13 +16,11 @@ import java.util.List;
 
 /**
  * 服务管理控制器
- * 仅在 Nacos 启用时加载
  */
 @Slf4j
 @RestController
 @RequestMapping("/gateway/service")
 @RequiredArgsConstructor
-@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(com.alibaba.nacos.api.naming.NamingService.class)
 public class ServiceController {
 
     @Autowired(required = false)

@@ -9,23 +9,28 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@TableName(value = "protocol_conversion", autoResultMap = true)
-public class ProtocolConversion {
+@TableName(value = "tenant", autoResultMap = true)
+public class Tenant {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String conversionId;
+    private String tenantId;
 
-    private String name;
+    private String tenantName;
+
+    private String tenantCode;
 
     private String description;
 
-    private String sourceProtocol;
+    private String contactName;
 
-    private String targetProtocol;
+    private String contactEmail;
+
+    private String contactPhone;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> routeIds;
@@ -33,27 +38,18 @@ public class ProtocolConversion {
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> serviceIds;
 
-    private String grpcServiceName;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private Map<String, String> resourceQuota;
 
-    private String grpcMethodName;
+    private Integer rateLimit;
 
-    private String dubboInterface;
+    private Long maxConnections;
 
-    private String dubboMethod;
+    private String isolationLevel;
 
-    private String dubboVersion;
+    private String status;
 
-    private String dubboGroup;
-
-    private String wsEndpoint;
-
-    private String wsMessageType;
-
-    private Integer heartbeatInterval;
-
-    private String transformScript;
-
-    private Integer enabled;
+    private LocalDateTime expireTime;
 
     private LocalDateTime createTime;
 

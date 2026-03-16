@@ -61,6 +61,41 @@ public class Result<T> {
         return new Result<>(code, message, null);
     }
 
+    /**
+     * 兼容旧版 API：成功响应（无数据）
+     */
+    public static <T> Result<T> success() {
+        return ok();
+    }
+
+    /**
+     * 兼容旧版 API：成功响应（带数据）
+     */
+    public static <T> Result<T> success(T data) {
+        return ok(data);
+    }
+
+    /**
+     * 兼容旧版 API：失败响应（带错误码枚举）
+     */
+    public static <T> Result<T> fail(ErrorCode errorCode) {
+        return failure(errorCode);
+    }
+
+    /**
+     * 兼容旧版 API：失败响应（带错误码和消息）
+     */
+    public static <T> Result<T> fail(String code, String message) {
+        return failure(code, message);
+    }
+
+    /**
+     * 兼容旧版 API：错误响应
+     */
+    public static <T> Result<T> error(String message) {
+        return new Result<>("99999", message, null);
+    }
+
     /*扩展方法，参考Optional类，用于结果的判断、转换、异常处理等*/
 
     /**

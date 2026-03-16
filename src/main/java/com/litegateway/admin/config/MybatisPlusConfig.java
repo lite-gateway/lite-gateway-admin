@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * MyBatis-Plus 配置类
  */
 @Configuration
-@MapperScan("com.litegateway.admin.repository.mapper")
+@MapperScan({"com.litegateway.admin.repository.mapper", "com.litegateway.admin.mapper"})
 public class MybatisPlusConfig {
 
     /**
