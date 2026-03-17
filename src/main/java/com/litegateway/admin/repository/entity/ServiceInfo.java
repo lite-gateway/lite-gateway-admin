@@ -67,6 +67,16 @@ public class ServiceInfo {
     private Integer healthyInstanceCount;
 
     /**
+     * API数量
+     */
+    private Integer apiCount;
+
+    /**
+     * 路由数量
+     */
+    private Integer routeCount;
+
+    /**
      * 服务状态：0-离线 1-在线 2-部分离线
      */
     private Integer status;

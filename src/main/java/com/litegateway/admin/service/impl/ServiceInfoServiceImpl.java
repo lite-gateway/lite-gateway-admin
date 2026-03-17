@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.litegateway.admin.repository.entity.ServiceInfo;
 import com.litegateway.admin.repository.entity.ServiceInstance;
+import com.litegateway.admin.repository.mapper.ApiInfoMapper;
+import com.litegateway.admin.repository.mapper.GatewayRouteMapper;
 import com.litegateway.admin.repository.mapper.ServiceInfoMapper;
 import com.litegateway.admin.repository.mapper.ServiceInstanceMapper;
 import com.litegateway.admin.service.ServiceInfoService;
@@ -43,6 +45,12 @@ public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, Servi
 
     @Autowired
     private ServiceInstanceMapper instanceMapper;
+
+    @Autowired(required = false)
+    private ApiInfoMapper apiInfoMapper;
+
+    @Autowired(required = false)
+    private GatewayRouteMapper gatewayRouteMapper;
 
     @Override
     public Page<ServiceInfo> queryPage(String serviceName, String groupName, Integer status, int pageNum, int pageSize) {
@@ -252,5 +260,41 @@ public class ServiceInfoServiceImpl extends ServiceImpl<ServiceInfoMapper, Servi
         entity.setCreateTime(LocalDateTime.now());
         entity.setUpdateTime(LocalDateTime.now());
         return super.save(entity);
+    }
+
+    /**
+     * 更新服务的API数量统计
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateApiCount(Long serviceId) {
+        if (apiInfoMapper == null || serviceId == null) {
+            return;
+        }
+        ServiceInfo serviceInfo = baseMapper.selectById(serviceId);
+        if (serviceInfo == null) {
+            return;
+        }
+        Long count = apiInfoMapper.selectCountByServiceId(serviceId);
+        serviceInfo.setApiCount(count != null ? count.intValue() : 0);
+        serviceInfo.setUpdateTime(LocalDateTime.now());
+        baseMapper.updateById(serviceInfo);
+    }
+
+    /**
+     * 更新服务的路由数量统计
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateRouteCount(Long serviceId) {
+        if (gatewayRouteMapper == null || serviceId == null) {
+            return;
+        }
+        ServiceInfo serviceInfo = baseMapper.selectById(serviceId);
+        if (serviceInfo == null) {
+            return;
+        }
+        Long count = gatewayRouteMapper.selectCountByServiceId(serviceId);
+        serviceInfo.setRouteCount(count != null ? count.intValue() : 0);
+        serviceInfo.setUpdateTime(LocalDateTime.now());
+        baseMapper.updateById(serviceInfo);
     }
 }

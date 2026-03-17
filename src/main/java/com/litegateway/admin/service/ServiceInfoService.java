@@ -45,4 +45,14 @@ public interface ServiceInfoService extends IService<ServiceInfo> {
      * 更新服务元数据
      */
     void updateMetadata(Long id, String metadata);
+
+    /**
+     * 更新服务的API数量统计
+     */
+    void updateApiCount(Long serviceId);
+
+    /**
+     * 更新服务的路由数量统计
+     */
+    void updateRouteCount(Long serviceId);
 }

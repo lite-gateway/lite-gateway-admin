@@ -76,6 +76,17 @@ public class ServiceController {
     @GetMapping("/{id}")
     public Result<ServiceInfo> getById(@PathVariable Long id) {
         ServiceInfo service = serviceInfoService.getById(id);
+        if (service != null) {
+            // 如果apiCount和routeCount为null，则动态计算
+            if (service.getApiCount() == null) {
+                serviceInfoService.updateApiCount(id);
+                service = serviceInfoService.getById(id);
+            }
+            if (service.getRouteCount() == null) {
+                serviceInfoService.updateRouteCount(id);
+                service = serviceInfoService.getById(id);
+            }
+        }
         return Result.ok(service);
     }
 

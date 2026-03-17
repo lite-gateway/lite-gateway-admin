@@ -37,4 +37,10 @@ public interface ApiInfoMapper extends BaseMapper<ApiInfo> {
      */
     @Select("SELECT * FROM api_info WHERE path = #{path} AND method = #{method} AND deleted = 0 LIMIT 1")
     ApiInfo selectByPathAndMethod(@Param("path") String path, @Param("method") String method);
+
+    /**
+     * 统计服务下的API数量
+     */
+    @Select("SELECT COUNT(*) FROM api_info WHERE service_id = #{serviceId} AND deleted = 0")
+    Long selectCountByServiceId(@Param("serviceId") Long serviceId);
 }
